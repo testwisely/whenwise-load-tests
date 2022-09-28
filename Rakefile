@@ -19,7 +19,8 @@ FULL_BUILD_MAX_TIME = ENV["DISTRIBUTED_MAX_BUILD_TIME"].to_i || 60 * 60   # max 
 FULL_BUILD_CHECK_INTERVAL =  ENV["DISTRIBUTED_BUILD_CHECK_INTERVAL"].to_i || 20  # check interval for build complete
 
 $test_dir =  File.expand_path( File.join( File.dirname(__FILE__), "spec" ) )  # change to aboslution path if invocation is not this directory
-# rspec will create 'spec/reports' under check out dir
+$perforamnce_test_dir =  File.expand_path( File.join( File.dirname(__FILE__), "performance" ) ) 
+$load_test_dir =  File.expand_path( File.join( File.dirname(__FILE__), "load" ) ) 
 
 # List tests you want to exclude
 #
@@ -33,6 +34,14 @@ def all_specs
 end
 
 def specs_for_quick_build
+  # list test files to be run in a quick build, leave the caller to set full path
+  [
+    "login_spec.rb", 
+    "not_exists_spec.rb" # test hanlding non exists scenario
+  ]
+end
+
+def specs_for_performance
   # list test files to be run in a quick build, leave the caller to set full path
   [
     "login_spec.rb", 
@@ -158,7 +167,22 @@ task "test:stats" do
 end
 
 
-## Load tests Target
+## Performance/Load tests Target
+
+
+desc "run tests in this spec/ folder, option to use INTELLIGENT_ORDERING or/and DYNAMIC_FEEDBACK"
+RSpec::Core::RakeTask.new("performance_tests") do |t|
+  specs_to_be_executed = buildwise_determine_specs_for_quick_build(specs_for_performance, excluded_spec_files, $perforamnce_test_dir);
+  buildwise_formatter =  File.join(File.dirname(__FILE__), "buildwise_rspec_formatter.rb")
+  t.rspec_opts = "--pattern my_own_custom_order --require #{buildwise_formatter} #{specs_to_be_executed.join(' ')} --order defined"
+end
+
+
+desc "run quick tests from BuildWise"
+task "ci:performance_tests" => ["ci:setup:rspec"] do
+  build_id = buildwise_start_build(:working_dir => File.expand_path(File.dirname(__FILE__)))
+  buildwise_run_sequential_build_target(build_id, "performance_tests")
+end
 
 
 desc "Load focused scenario"
