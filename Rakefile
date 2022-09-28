@@ -42,7 +42,16 @@ def specs_for_quick_build
 end
 
 def specs_for_performance
-  # list test files to be run in a quick build, leave the caller to set full path
+  # list test files to be run in a performance (mechanize) build, leave the caller to set full path
+  [
+    "login_spec.rb", 
+    "not_exists_spec.rb" # test hanlding non exists scenario
+  ]
+end
+
+
+def specs_for_performance_functional
+  # list test files to be run in a perforamnce (funcitonal) build, leave the caller to set full path
   [
     "login_spec.rb", 
     "not_exists_spec.rb" # test hanlding non exists scenario
@@ -170,7 +179,7 @@ end
 ## Performance/Load tests Target
 
 
-desc "run tests in this spec/ folder, option to use INTELLIGENT_ORDERING or/and DYNAMIC_FEEDBACK"
+desc "run tests in this performance/ folder, option to use INTELLIGENT_ORDERING or/and DYNAMIC_FEEDBACK"
 RSpec::Core::RakeTask.new("performance_tests") do |t|
   specs_to_be_executed = buildwise_determine_specs_for_quick_build(specs_for_performance, excluded_spec_files, $perforamnce_test_dir);
   buildwise_formatter =  File.join(File.dirname(__FILE__), "buildwise_rspec_formatter.rb")
@@ -178,8 +187,21 @@ RSpec::Core::RakeTask.new("performance_tests") do |t|
 end
 
 
-desc "run quick tests from BuildWise"
+desc "run performance tests from BuildWise"
 task "ci:performance_tests" => ["ci:setup:rspec"] do
+  build_id = buildwise_start_build(:working_dir => File.expand_path(File.dirname(__FILE__)))
+  buildwise_run_sequential_build_target(build_id, "performance_tests")
+end
+
+desc "run tests in this load/ folder, option to use INTELLIGENT_ORDERING or/and DYNAMIC_FEEDBACK"
+RSpec::Core::RakeTask.new("performance_tests:functional") do |t|
+  specs_to_be_executed = buildwise_determine_specs_for_quick_build(specs_for_performance_functional, excluded_spec_files, $load_test_dir);
+  buildwise_formatter =  File.join(File.dirname(__FILE__), "buildwise_rspec_formatter.rb")
+  t.rspec_opts = "--pattern my_own_custom_order --require #{buildwise_formatter} #{specs_to_be_executed.join(' ')} --order defined"
+end
+
+desc "run functional performance tests from BuildWise"
+task "ci:performance_tests:functional" => ["ci:setup:rspec"] do
   build_id = buildwise_start_build(:working_dir => File.expand_path(File.dirname(__FILE__)))
   buildwise_run_sequential_build_target(build_id, "performance_tests")
 end
