@@ -2,7 +2,7 @@ load File.dirname(__FILE__) + "/../test_helper.rb"
 load File.dirname(__FILE__) + "/../load_test_helper.rb"
 require "mechanize"
 
-describe "Login" do
+describe "Performance User Login" do
   include TestHelper
   include LoadTestHelper
 
@@ -14,7 +14,7 @@ describe "Login" do
     dump_timings
   end
 
-  it "Test Case Name" do
+  it "Login" do
     log_time("Visit home page") { @browser.get(site_url) }
     log_time("Visit login page") { @browser.get(site_url + "/sign-in") }
     login_form = @browser.page.forms.first
