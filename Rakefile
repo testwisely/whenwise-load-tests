@@ -203,7 +203,7 @@ end
 desc "run functional performance tests from BuildWise"
 task "ci:performance_tests:functional" => ["ci:setup:rspec"] do
   build_id = buildwise_start_build(:working_dir => File.expand_path(File.dirname(__FILE__)))
-  buildwise_run_sequential_build_target(build_id, "performance_tests")
+  buildwise_run_sequential_build_target(build_id, "performance_tests:functional")
 end
 
 
