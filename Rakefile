@@ -211,7 +211,7 @@ desc "Load focused scenario"
 task "ci:load_tests:login" => ["ci:setup:rspec"] do
   build_id = buildwise_start_build(:working_dir => File.expand_path(File.dirname(__FILE__)),
                                    :ui_test_dir => ["load"],
-                                   :only => ["login_pec.rb"],
+                                   :only => ["login_spec.rb"],
                                    :excluded => excluded_spec_files || [],
                                    :distributed => true
   )
